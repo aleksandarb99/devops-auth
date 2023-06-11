@@ -71,6 +71,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if (updateUserDto.getUsername() != null) {
+//            TODO: Check if new username exist in db. Throw error if exist
             user.setUsername(updateUserDto.getUsername());
         }
 
@@ -101,6 +102,14 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(
                 () -> new BadRequestException(String.format("User with id '%s' does not exist.", id)));
+
+//        TODO: First, send host id to reservations microservice then reservations should contact accommodation
+//         service to gather info about their accommodation and then check do him have reservations in future, return that info here
+//         If so, dont let him delete account. If he dont have reservations in future, let him, but trigger endpoint on
+//         accommodation microservice to delete all his accommodations
+//        TODO: If guest, then check have him already reserved something in future, if not, delete his account
+
+
         userRepository.delete(user);
     }
 

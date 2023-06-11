@@ -50,4 +50,7 @@ public class UserController {
 
 //    TODO: Add endpoint for reservation microservice
 
+//    TODO: This we will do after we finish everyting else. Check new spring security started
+//     So we need to finish authorization and authentification
+
 }
