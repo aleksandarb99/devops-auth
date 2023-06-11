@@ -19,6 +19,8 @@
         <modelmapper.version>3.1.1</modelmapper.version>
         <mockito.version>5.1.1</mockito.version>
         <testcontainers.version>1.18.1</testcontainers.version>
+        <sonar.organization>aleksandarb99</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
     <dependencyManagement>
         <dependencies>
