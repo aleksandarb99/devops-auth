@@ -21,6 +21,7 @@
         <testcontainers.version>1.18.1</testcontainers.version>
         <sonar.organization>aleksandarb99</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <openfeign.version>4.0.3</openfeign.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -59,6 +60,11 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <version>${openfeign.version}</version>
         </dependency>
         <dependency>
             <groupId>org.modelmapper</groupId>

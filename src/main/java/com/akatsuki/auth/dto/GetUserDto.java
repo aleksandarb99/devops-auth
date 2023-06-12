@@ -18,4 +18,5 @@ public class GetUserDto {
     private String email;
     private String address;
     private String phoneNumber;
+    private int numberOfCancelledReservations;
 }
