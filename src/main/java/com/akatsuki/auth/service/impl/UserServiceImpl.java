@@ -6,6 +6,7 @@ import com.akatsuki.auth.dto.UserDto;
 import com.akatsuki.auth.enums.UserRole;
 import com.akatsuki.auth.exception.BadRequestException;
 import com.akatsuki.auth.feignclients.AccommodationFeignClient;
+import com.akatsuki.auth.feignclients.ReservationFeignClient;
 import com.akatsuki.auth.model.User;
 import com.akatsuki.auth.repository.UserRepository;
 import com.akatsuki.auth.service.UserService;
@@ -25,6 +26,7 @@ public class UserServiceImpl implements UserService {
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
     private final AccommodationFeignClient accommodationFeignClient;
+    private final ReservationFeignClient reservationFeignClient;
 
     @Override
     public List<User> getAllUsers() {
@@ -119,18 +121,16 @@ public class UserServiceImpl implements UserService {
                 () -> new BadRequestException(String.format("User with id '%s' does not exist.", id)));
 
         if (user.getRole().equals(UserRole.HOST)) {
-//            TODO: Contanct reservations
-            boolean doHisAccommodationsHaveResevationsInFuture = false;
-            if (doHisAccommodationsHaveResevationsInFuture) {
+            boolean ifHostCanBeDeleted = reservationFeignClient.checkIfHostCanBeDeleted(id);
+            if (!ifHostCanBeDeleted) {
                 throw new BadRequestException("It is impossible to delete the account due to the existence of a reservation.");
             }
 
             userRepository.delete(user);
             accommodationFeignClient.deleteAccommodationsByHostId(id);
         } else {
-//      TODO: Contant reservations and check do this id have some reservations in future
-            boolean haveReservationsInFuture = false;
-            if (haveReservationsInFuture) {
+            boolean ifGuestCanBeDeleted = reservationFeignClient.checkIfGuestCanBeDeleted(id);
+            if (!ifGuestCanBeDeleted) {
                 throw new BadRequestException("It is impossible to delete the account due to the existence of a reservation.");
             }
 
