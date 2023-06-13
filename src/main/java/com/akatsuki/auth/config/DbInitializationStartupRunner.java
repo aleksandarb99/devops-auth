@@ -29,6 +29,7 @@ public class DbInitializationStartupRunner implements ApplicationRunner {
                 .phoneNumber("063333333")
                 .role(UserRole.HOST)
                 .password(passwordEncoder.encode("marko"))
+                .numberOfCancelledReservations(0)
                 .build();
         User u2 = User.builder()
                 .username("nikola")
@@ -39,6 +40,7 @@ public class DbInitializationStartupRunner implements ApplicationRunner {
                 .phoneNumber("061111111")
                 .role(UserRole.HOST)
                 .password(passwordEncoder.encode("nikola"))
+                .numberOfCancelledReservations(0)
                 .build();
         User u3 = User.builder()
                 .username("jovan")
@@ -49,6 +51,7 @@ public class DbInitializationStartupRunner implements ApplicationRunner {
                 .phoneNumber("062222222")
                 .role(UserRole.GUEST)
                 .password(passwordEncoder.encode("jovan"))
+                .numberOfCancelledReservations(0)
                 .build();
 
         userRepository.saveAll(List.of(u1, u2, u3));

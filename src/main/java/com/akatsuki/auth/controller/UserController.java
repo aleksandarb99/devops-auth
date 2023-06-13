@@ -42,15 +42,19 @@ public class UserController {
         userService.updateUser(userDto);
     }
 
+    @PutMapping("/cancellation/{id}")
+    public void addCancellation(@PathVariable Long id) {
+        userService.addCancellation(id);
+    }
+
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
     }
 
-//    TODO: Add endpoint for reservation microservice
-
 //    TODO: This we will do after we finish everyting else. Check new spring security started
 //     So we need to finish authorization and authentification
+//    TODO: After we add tokens and stuff, delete path param where we dont need it
 
 }

@@ -3,7 +3,10 @@ package com.akatsuki.auth.service.impl;
 import com.akatsuki.auth.dto.GetUserDto;
 import com.akatsuki.auth.dto.UpdateUserDto;
 import com.akatsuki.auth.dto.UserDto;
+import com.akatsuki.auth.enums.UserRole;
 import com.akatsuki.auth.exception.BadRequestException;
+import com.akatsuki.auth.feignclients.AccommodationFeignClient;
+import com.akatsuki.auth.feignclients.ReservationFeignClient;
 import com.akatsuki.auth.model.User;
 import com.akatsuki.auth.repository.UserRepository;
 import com.akatsuki.auth.service.UserService;
@@ -22,6 +25,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
+    private final AccommodationFeignClient accommodationFeignClient;
+    private final ReservationFeignClient reservationFeignClient;
 
     @Override
     public List<User> getAllUsers() {
@@ -54,6 +59,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void addCancellation(Long id) {
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new BadRequestException(String.format("User with id '%s' does not exist.", id)));
+        user.setNumberOfCancelledReservations(user.getNumberOfCancelledReservations() + 1);
+        userRepository.save(user);
+    }
+
+    @Override
     public void updateUser(UpdateUserDto updateUserDto) {
         Long id = updateUserDto.getId();
         User user = userRepository.findById(id).orElseThrow(
@@ -71,7 +84,11 @@ public class UserServiceImpl implements UserService {
         }
 
         if (updateUserDto.getUsername() != null) {
-//            TODO: Check if new username exist in db. Throw error if exist
+           Optional<User> checkUser = userRepository.findByUsername(updateUserDto.getUsername());
+            if (checkUser.isPresent()) {
+                throw new BadRequestException(String.format("Username '%s' is already in use.", updateUserDto.getUsername()));
+            }
+
             user.setUsername(updateUserDto.getUsername());
         }
 
@@ -103,14 +120,22 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id).orElseThrow(
                 () -> new BadRequestException(String.format("User with id '%s' does not exist.", id)));
 
-//        TODO: First, send host id to reservations microservice then reservations should contact accommodation
-//         service to gather info about their accommodation and then check do him have reservations in future, return that info here
-//         If so, dont let him delete account. If he dont have reservations in future, let him, but trigger endpoint on
-//         accommodation microservice to delete all his accommodations
-//        TODO: If guest, then check have him already reserved something in future, if not, delete his account
+        if (user.getRole().equals(UserRole.HOST)) {
+            boolean ifHostCanBeDeleted = reservationFeignClient.checkIfHostCanBeDeleted(id);
+            if (!ifHostCanBeDeleted) {
+                throw new BadRequestException("It is impossible to delete the account due to the existence of a reservation.");
+            }
 
+            userRepository.delete(user);
+            accommodationFeignClient.deleteAccommodationsByHostId(id);
+        } else {
+            boolean ifGuestCanBeDeleted = reservationFeignClient.checkIfGuestCanBeDeleted(id);
+            if (!ifGuestCanBeDeleted) {
+                throw new BadRequestException("It is impossible to delete the account due to the existence of a reservation.");
+            }
 
-        userRepository.delete(user);
+            userRepository.delete(user);
+        }
     }
 
 }
