@@ -1,0 +1,55 @@
+server:
+  port: 9000
+spring:
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create-drop
+      show-sql: false
+    open-in-view: false
+  datasource:
+    url: jdbc:postgresql://${DATABASE_DOMAIN:localhost}:${DATABASE_PORT:5432}/${DATABASE_SCHEMA:user-db}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:admin}
+#  security:
+#    user:
+#      name: user1
+#      password: password
+logging:
+  level:
+    org.springframework.security: trace
+#    oauth2:
+#      authorizationserver:
+#        client:
+#          accommodation-client:
+#            registration:
+#              client-id: "accommodation-client"
+#              client-authentication-methods:
+#                - "none"
+#              authorization-grant-types:
+#                - "authorization_code"
+#                - "refresh_token"
+#                - "client_credentials"
+#              redirect-uris:
+##                - "http://127.0.0.1:8080/login/oauth2/code/accommodation-client-oidc"
+##                - "http://127.0.0.1:8080/authorized"
+#                - "https://oauth.pstmn.io/v1/callback"
+#              post-logout-redirect-uris:
+##                - "http://127.0.0.1:8080/logged-out"
+#                - "https://oauth.pstmn.io/v1/callback"
+#              scopes:
+#                - "openid"
+#                - "profile"
+#                - "accommodation.read"
+#            require-authorization-consent: true
+core:
+  services:
+    accommodation-url: ${ACCOMMODATION_URL:http://localhost:8080/api/v1/accommodation}
+    reservation-url: ${RESERVATION_URL:http://localhost:8081/api/v1/reservation}
+
+
+
+
+
