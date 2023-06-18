@@ -59,24 +59,19 @@ public class AuthorizationServerConfig {
                                 new LoginUrlAuthenticationEntryPoint("/login"),
                                 new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
                         )
-                )
-                .oauth2ResourceServer((resourceServer) -> resourceServer
-                        .jwt(Customizer.withDefaults()));
-
+                );
         return http.build();
     }
 
+    //    TODO: We will need ROLES
     @Bean
     @Order(2)
     public SecurityFilterChain filterChain(HttpSecurity http, JwtDecoder jwtDecoder) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
 //                        .requestMatchers("/messages/**").hasAuthority("SCOPE_message:read")
-                                .requestMatchers("/oauth2/**", "/login").anonymous()
-                                .anyRequest().authenticated()
-
-                )
-                .formLogin(Customizer.withDefaults()) // Enable form-based login
+                        .anyRequest().authenticated())
+                .formLogin(Customizer.withDefaults())
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt
                                 .decoder(jwtDecoder)
@@ -93,6 +88,7 @@ public class AuthorizationServerConfig {
         return authenticationProvider;
     }
 
+    //    TODO: Put secrets and urls to env and read in in application.yml
     @Bean
     public RegisteredClientRepository registeredClientRepository(PasswordEncoder passwordEncoder) {
         RegisteredClient oidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
