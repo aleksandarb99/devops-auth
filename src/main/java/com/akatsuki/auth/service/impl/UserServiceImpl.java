@@ -97,7 +97,9 @@ public class UserServiceImpl implements UserService {
         if (updateUserDto.getUsername() != null) {
             Optional<User> checkUser = userRepository.findByUsername(updateUserDto.getUsername());
             if (checkUser.isPresent()) {
-                throw new BadRequestException(String.format("Username '%s' is already in use.", updateUserDto.getUsername()));
+                if (checkUser.get().getId() == id) {
+                    throw new BadRequestException(String.format("Username '%s' is already in use.", updateUserDto.getUsername()));
+                }
             }
 
             user.setUsername(updateUserDto.getUsername());
