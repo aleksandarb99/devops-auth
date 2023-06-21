@@ -100,14 +100,15 @@ public class AuthorizationServerConfig {
 
     //    TODO: Put secrets and urls to env and read in in application.yml
     @Bean
-    public RegisteredClientRepository registeredClientRepository(PasswordEncoder passwordEncoder) {
+    public RegisteredClientRepository registeredClientRepository() {
         RegisteredClient oidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
                 .clientId("oidc-client")
-                .clientSecret(passwordEncoder.encode("oidc-secret"))
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+                .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .redirectUri("http://localhost:4200/callback")
+//                .redirectUri("https://oauth.pstmn.io/v1/callback")
+//                .postLogoutRedirectUri("https://oauth.pstmn.io/v1/callback")
                 .postLogoutRedirectUri("http://localhost:4200/callback")
                 .scope(OidcScopes.OPENID)
                 .scope(OidcScopes.PROFILE)

@@ -18,8 +18,6 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://127.0.0.1:9000
-#  level:
-#    org.springframework.security: debug
 logging:
   level:
     root: INFO
