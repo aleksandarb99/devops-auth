@@ -1,5 +1,7 @@
 package com.akatsuki.auth.config;
 
+import com.akatsuki.auth.enums.UserRole;
+import com.akatsuki.auth.model.User;
 import com.akatsuki.auth.service.UserService;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -12,11 +14,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -29,6 +33,8 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
+import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
@@ -37,6 +43,8 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 
 @Configuration
@@ -45,6 +53,9 @@ public class AuthorizationServerConfig {
 
 //    TODO: Fix username checking when we update our user
 //    TODO: Fix bug when someone update his attributes new user is saved
+
+    @Value("${frontend.base}")
+    private String frontendBase;
 
     @Value("${frontend.callback}")
     private String frontendCallback;
@@ -59,6 +70,7 @@ public class AuthorizationServerConfig {
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http)
             throws Exception {
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+
         http
                 .cors(Customizer.withDefaults())
                 .getConfigurer(OAuth2AuthorizationServerConfigurer.class)
@@ -81,12 +93,19 @@ public class AuthorizationServerConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-//                        .requestMatchers("/messages/**").hasAuthority("SCOPE_message:read")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/user/cancellation").hasRole(UserRole.GUEST.name().toUpperCase(Locale.ROOT))
                         .requestMatchers(HttpMethod.POST, "/api/v1/user").permitAll()
+                        .requestMatchers("/logout").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(Customizer.withDefaults())
+                .logout(logout -> {
+                    logout.logoutSuccessUrl(frontendBase);
+                    logout.invalidateHttpSession(true);
+                    logout.clearAuthentication(true);
+                    logout.deleteCookies("JSESSIONID");
+                })
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt
                                 .decoder(jwtDecoder)
@@ -116,6 +135,19 @@ public class AuthorizationServerConfig {
                 .scope(OidcScopes.PROFILE)
                 .build();
         return new InMemoryRegisteredClientRepository(oidcClient);
+    }
+
+    @Bean
+    public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer() {
+        return context -> {
+            Authentication principal = context.getPrincipal();
+            if (Objects.equals(context.getTokenType().getValue(), "access_token") && principal instanceof UsernamePasswordAuthenticationToken) {
+                User user = (User) principal.getPrincipal();
+                context.getClaims()
+                        .claim("id", user.getId())
+                        .claim("role", "ROLE_" + user.getRole().name().toUpperCase(Locale.ROOT));
+            }
+        };
     }
 
     @Bean

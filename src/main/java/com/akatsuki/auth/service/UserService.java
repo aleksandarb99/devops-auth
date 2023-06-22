@@ -15,7 +15,7 @@ public interface UserService extends UserDetailsService {
 
     void createUser(UserDto userDto);
 
-    void updateUser(UpdateUserDto userDto);
+    void updateUser(UpdateUserDto userDto, Long id);
 
     void addCancellation(Long id);
 

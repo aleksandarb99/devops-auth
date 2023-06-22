@@ -3,14 +3,12 @@ package com.akatsuki.auth.controller;
 import com.akatsuki.auth.dto.GetUserDto;
 import com.akatsuki.auth.dto.UpdateUserDto;
 import com.akatsuki.auth.dto.UserDto;
-import com.akatsuki.auth.model.User;
 import com.akatsuki.auth.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/user")
@@ -18,16 +16,21 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final JwtDecoder jwtDecoder;
 
-//    TODO: Get id from token for some actions like deleting account
+//    @GetMapping
+//    public List<User> getAllUsers() {
+//        return userService.getAllUsers();
+//    }
+//
+//    @GetMapping("/{id}")
+//    public GetUserDto getUser(@PathVariable Long id) {
+//        return userService.getUser(id);
+//    }
 
-    @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
-    }
-
-    @GetMapping("/{id}")
-    public GetUserDto getUser(@PathVariable Long id) {
+    @GetMapping("/user-details")
+    public GetUserDto getUserDetails(@RequestHeader("Authorization") final String token) {
+        Long id = getIdFromToken(token);
         return userService.getUser(id);
     }
 
@@ -38,23 +41,28 @@ public class UserController {
     }
 
     @PutMapping
-    public void updateUser(@Valid @RequestBody UpdateUserDto userDto) {
-        userService.updateUser(userDto);
+    public void updateUser(@Valid @RequestBody UpdateUserDto userDto, @RequestHeader("Authorization") final String token) {
+        Long id = getIdFromToken(token);
+        userService.updateUser(userDto, id);
     }
 
-    @PutMapping("/cancellation/{id}")
-    public void addCancellation(@PathVariable Long id) {
+    //    SAMO GOST
+    @PutMapping("/cancellation")
+    public void addCancellation(@RequestHeader("Authorization") final String token) {
+        Long id = getIdFromToken(token);
         userService.addCancellation(id);
     }
 
+
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable Long id) {
+    @DeleteMapping
+    public void deleteUser(@RequestHeader("Authorization") final String token) {
+        Long id = getIdFromToken(token);
         userService.deleteUser(id);
     }
 
-//    TODO: This we will do after we finish everyting else. Check new spring security started
-//     So we need to finish authorization and authentification
-//    TODO: After we add tokens and stuff, delete path param where we dont need it
+    private Long getIdFromToken(String token) {
+        return (Long) jwtDecoder.decode(token).getClaims().get("id");
+    }
 
 }

@@ -78,8 +78,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUser(UpdateUserDto updateUserDto) {
-        Long id = updateUserDto.getId();
+    public void updateUser(UpdateUserDto updateUserDto, Long id) {
         User user = userRepository.findById(id).orElseThrow(
                 () -> new BadRequestException(String.format("User with id '%s' does not exist.", id)));
 
