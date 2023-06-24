@@ -1,5 +1,5 @@
 #server:
-#  port: 9000
+#  port: 9000 ${PORT:9000}
 spring:
   jpa:
     properties:
@@ -32,6 +32,8 @@ core:
 frontend:
   base: http://localhost:4200
   callback: http://localhost:4200/callback
+api-gw:
+  base: http://localhost:4000
 
 
 

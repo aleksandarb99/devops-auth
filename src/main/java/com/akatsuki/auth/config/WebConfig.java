@@ -14,6 +14,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${frontend.base}")
     private String frontendBase;
 
+    @Value("${api-gw.base}")
+    private String apiBase;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -23,7 +26,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry
                 .addMapping("/**")
-                .allowedOrigins(frontendBase)
+                .allowedOrigins(frontendBase, apiBase, "http://accommodation-service:8080", "http://reservation-service:8080")
                 .allowedMethods("*")
                 .allowedHeaders("*")
                 .allowCredentials(true)
