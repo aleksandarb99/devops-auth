@@ -1,0 +1,38 @@
+server:
+  port: 9000
+spring:
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create-drop
+      show-sql: false
+    open-in-view: false
+  datasource:
+    url: jdbc:postgresql://${DATABASE_DOMAIN:localhost}:${DATABASE_PORT:5432}/${DATABASE_SCHEMA:user-db}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:admin}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          #          issuer-uri: http://127.0.0.1:9000
+          issuer-uri: ${AUTH_URL:http://localhost:9000}
+#logging:
+#  level:
+#    root: INFO
+#    org.springframework.web: INFO
+#    org.springframework.security: DEBUG
+#    org.springframework.security.oauth2: DEBUG
+core:
+  services:
+    accommodation-url: ${ACCOMMODATION_URL:http://localhost:8080/api/v1/accommodation}
+    reservation-url: ${RESERVATION_URL:http://localhost:8081/api/v1/reservation}
+frontend:
+  base: http://localhost:4200
+  callback: http://localhost:4200/callback
+
+
+
+

@@ -1,6 +1,5 @@
 package com.akatsuki.auth.dto;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,8 +10,6 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 public class UpdateUserDto {
-    @NotNull
-    private Long id;
     private String username;
     private String password;
     private String givenName;

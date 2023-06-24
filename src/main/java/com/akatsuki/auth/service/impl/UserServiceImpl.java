@@ -12,6 +12,8 @@ import com.akatsuki.auth.repository.UserRepository;
 import com.akatsuki.auth.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,15 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final AccommodationFeignClient accommodationFeignClient;
     private final ReservationFeignClient reservationFeignClient;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isEmpty()) {
+            throw new UsernameNotFoundException("That username is not found.");
+        }
+        return optionalUser.get();
+    }
 
     @Override
     public List<User> getAllUsers() {
@@ -67,8 +78,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUser(UpdateUserDto updateUserDto) {
-        Long id = updateUserDto.getId();
+    public void updateUser(UpdateUserDto updateUserDto, Long id) {
         User user = userRepository.findById(id).orElseThrow(
                 () -> new BadRequestException(String.format("User with id '%s' does not exist.", id)));
 
@@ -84,9 +94,11 @@ public class UserServiceImpl implements UserService {
         }
 
         if (updateUserDto.getUsername() != null) {
-           Optional<User> checkUser = userRepository.findByUsername(updateUserDto.getUsername());
+            Optional<User> checkUser = userRepository.findByUsername(updateUserDto.getUsername());
             if (checkUser.isPresent()) {
-                throw new BadRequestException(String.format("Username '%s' is already in use.", updateUserDto.getUsername()));
+                if (checkUser.get().getId() == id) {
+                    throw new BadRequestException(String.format("Username '%s' is already in use.", updateUserDto.getUsername()));
+                }
             }
 
             user.setUsername(updateUserDto.getUsername());
