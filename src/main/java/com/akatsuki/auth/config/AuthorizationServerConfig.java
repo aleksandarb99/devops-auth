@@ -1,6 +1,5 @@
 package com.akatsuki.auth.config;
 
-import com.akatsuki.auth.enums.UserRole;
 import com.akatsuki.auth.model.User;
 import com.akatsuki.auth.service.UserService;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -35,6 +34,8 @@ import org.springframework.security.oauth2.server.authorization.config.annotatio
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
@@ -43,6 +44,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
@@ -86,14 +88,13 @@ public class AuthorizationServerConfig {
     }
 
 
-    //    TODO: We will need ROLES
     @Bean
     @Order(2)
     public SecurityFilterChain filterChain(HttpSecurity http, JwtDecoder jwtDecoder) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/user/cancellation").hasRole(UserRole.GUEST.name().toUpperCase(Locale.ROOT))
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/user/cancellation").hasRole("GUEST")
                         .requestMatchers(HttpMethod.POST, "/api/v1/user").permitAll()
                         .requestMatchers("/logout").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -107,8 +108,9 @@ public class AuthorizationServerConfig {
                     logout.deleteCookies("JSESSIONID");
                 })
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt
-                                .decoder(jwtDecoder)
+                        .jwt(jwt -> {
+                                    jwt.decoder(jwtDecoder);
+                                }
                         )
                 );
         return http.build();
@@ -138,6 +140,17 @@ public class AuthorizationServerConfig {
     }
 
     @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        final JwtGrantedAuthoritiesConverter gac = new JwtGrantedAuthoritiesConverter();
+        gac.setAuthoritiesClaimName("roles");
+        gac.setAuthorityPrefix("ROLE_");
+
+        final JwtAuthenticationConverter jac = new JwtAuthenticationConverter();
+        jac.setJwtGrantedAuthoritiesConverter(gac);
+        return jac;
+    }
+
+    @Bean
     public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer() {
         return context -> {
             Authentication principal = context.getPrincipal();
@@ -145,7 +158,7 @@ public class AuthorizationServerConfig {
                 User user = (User) principal.getPrincipal();
                 context.getClaims()
                         .claim("id", user.getId())
-                        .claim("role", "ROLE_" + user.getRole().name().toUpperCase(Locale.ROOT));
+                        .claim("roles", List.of(user.getRole().name().toUpperCase(Locale.ROOT)));
             }
         };
     }

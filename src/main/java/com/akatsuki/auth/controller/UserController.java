@@ -62,7 +62,7 @@ public class UserController {
     }
 
     private Long getIdFromToken(String token) {
-        return (Long) jwtDecoder.decode(token).getClaims().get("id");
+        return (Long) jwtDecoder.decode(token.split(" ")[1]).getClaims().get("id");
     }
 
 }
