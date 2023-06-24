@@ -74,7 +74,7 @@ public class AuthorizationServerConfig {
                 .getConfigurer(OAuth2AuthorizationServerConfigurer.class)
                 .oidc(Customizer.withDefaults());
         http
-                .exceptionHandling((exceptions) -> exceptions
+                .exceptionHandling(exceptions -> exceptions
                         .defaultAuthenticationEntryPointFor(
                                 new LoginUrlAuthenticationEntryPoint("/login"),
                                 new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
@@ -102,12 +102,7 @@ public class AuthorizationServerConfig {
                     logout.clearAuthentication(true);
                     logout.deleteCookies("JSESSIONID");
                 })
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> {
-                                    jwt.decoder(jwtDecoder);
-                                }
-                        )
-                );
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder)));
         return http.build();
     }
 
