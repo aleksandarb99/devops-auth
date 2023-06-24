@@ -46,7 +46,6 @@ public class UserController {
         userService.updateUser(userDto, id);
     }
 
-    //    SAMO GOST
     @PutMapping("/cancellation")
     public void addCancellation(@RequestHeader("Authorization") final String token) {
         Long id = getIdFromToken(token);

@@ -10,6 +10,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -20,7 +21,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
@@ -51,6 +51,7 @@ import java.util.UUID;
 
 @Configuration
 @EnableWebSecurity
+@Profile(value = "!test")
 public class AuthorizationServerConfig {
 
 //    TODO: Fix username checking when we update our user
@@ -61,11 +62,6 @@ public class AuthorizationServerConfig {
 
     @Value("${frontend.callback}")
     private String frontendCallback;
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 
     @Bean
     @Order(1)
@@ -86,7 +82,6 @@ public class AuthorizationServerConfig {
                 );
         return http.build();
     }
-
 
     @Bean
     @Order(2)
@@ -185,7 +180,6 @@ public class AuthorizationServerConfig {
     public AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder().build();
     }
-
 
     private static KeyPair generateRsaKey() {
         KeyPair keyPair;
