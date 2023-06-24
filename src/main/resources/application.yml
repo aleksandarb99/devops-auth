@@ -1,5 +1,3 @@
-#server:
-#  port: 9000
 spring:
   jpa:
     properties:
@@ -17,14 +15,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          #          issuer-uri: http://127.0.0.1:9000
           issuer-uri: ${AUTH_URL:http://localhost:9000}
-#logging:
-#  level:
-#    root: INFO
-#    org.springframework.web: INFO
-#    org.springframework.security: DEBUG
-#    org.springframework.security.oauth2: DEBUG
 core:
   services:
     accommodation-url: ${ACCOMMODATION_URL:http://localhost:8080/api/v1/accommodation}
@@ -32,6 +23,8 @@ core:
 frontend:
   base: http://localhost:4200
   callback: http://localhost:4200/callback
+api-gw:
+  base: http://localhost:4000
 
 
 
