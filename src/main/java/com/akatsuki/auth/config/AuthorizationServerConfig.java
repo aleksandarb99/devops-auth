@@ -32,6 +32,8 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
+import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
@@ -44,6 +46,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -53,9 +56,6 @@ import java.util.UUID;
 @EnableWebSecurity
 @Profile(value = "!test")
 public class AuthorizationServerConfig {
-
-//    TODO: Fix username checking when we update our user
-//    TODO: Fix bug when someone update his attributes new user is saved
 
     @Value("${frontend.base}")
     private String frontendBase;
@@ -125,6 +125,12 @@ public class AuthorizationServerConfig {
                 .postLogoutRedirectUri(frontendCallback)
                 .scope(OidcScopes.OPENID)
                 .scope(OidcScopes.PROFILE)
+                .clientSettings(ClientSettings.builder()
+                        .requireAuthorizationConsent(false)
+                        .build())
+                .tokenSettings(TokenSettings.builder()
+                        .accessTokenTimeToLive(Duration.ofMinutes(30))
+                        .build())
                 .build();
         return new InMemoryRegisteredClientRepository(oidcClient);
     }

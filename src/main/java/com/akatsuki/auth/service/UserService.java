@@ -19,5 +19,5 @@ public interface UserService extends UserDetailsService {
 
     void addCancellation(Long id);
 
-    void deleteUser(Long id);
+    void deleteUser(Long id, String token);
 }
