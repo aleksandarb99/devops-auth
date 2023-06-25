@@ -2,13 +2,12 @@ package com.akatsuki.auth.feignclients;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @FeignClient(url = "${core.services.accommodation-url}", value = "accommodation-feign-client")
 public interface AccommodationFeignClient {
 
-    //    TODO: Send tokens and fix other microservices than
-    @DeleteMapping("/by-host-id/{id}")
-    void deleteAccommodationsByHostId(@PathVariable Long id);
+    @DeleteMapping("/by-host-id")
+    void deleteAccommodationsByHostId(@RequestHeader("Authorization") final String token);
 }
 

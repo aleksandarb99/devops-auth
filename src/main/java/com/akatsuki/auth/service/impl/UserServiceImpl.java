@@ -128,20 +128,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUser(Long id) {
+    public void deleteUser(Long id, String token) {
         User user = userRepository.findById(id).orElseThrow(
                 () -> new BadRequestException(String.format("User with id '%s' does not exist.", id)));
 
         if (user.getRole().equals(UserRole.HOST)) {
-            boolean ifHostCanBeDeleted = reservationFeignClient.checkIfHostCanBeDeleted(id);
+            boolean ifHostCanBeDeleted = reservationFeignClient.checkIfHostCanBeDeleted(token);
             if (!ifHostCanBeDeleted) {
                 throw new BadRequestException("It is impossible to delete the account due to the existence of a reservation.");
             }
 
             userRepository.delete(user);
-            accommodationFeignClient.deleteAccommodationsByHostId(id);
+            accommodationFeignClient.deleteAccommodationsByHostId(token);
         } else {
-            boolean ifGuestCanBeDeleted = reservationFeignClient.checkIfGuestCanBeDeleted(id);
+            boolean ifGuestCanBeDeleted = reservationFeignClient.checkIfGuestCanBeDeleted(token);
             if (!ifGuestCanBeDeleted) {
                 throw new BadRequestException("It is impossible to delete the account due to the existence of a reservation.");
             }

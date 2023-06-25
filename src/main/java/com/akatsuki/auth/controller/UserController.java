@@ -57,7 +57,7 @@ public class UserController {
     @DeleteMapping
     public void deleteUser(@RequestHeader("Authorization") final String token) {
         Long id = getIdFromToken(token);
-        userService.deleteUser(id);
+        userService.deleteUser(id, token);
     }
 
     private Long getIdFromToken(String token) {
