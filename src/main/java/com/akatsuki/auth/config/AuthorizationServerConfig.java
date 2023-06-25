@@ -57,9 +57,6 @@ import java.util.UUID;
 @Profile(value = "!test")
 public class AuthorizationServerConfig {
 
-//    TODO: Fix username checking when we update our user
-//    TODO: Fix bug when someone update his attributes new user is saved
-
     @Value("${frontend.base}")
     private String frontendBase;
 
